@@ -73,6 +73,7 @@
             const form = document.getElementById('form');
             const input = document.getElementById('input');
             const messages = document.getElementById('messages');
+            const nickname = prompt('Please, enter your username: ', '');
 
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -82,6 +83,9 @@
                 }
             });
 
+            socket.emit('user join', nickname)
+
+
             socket.on('chat message', (msg, serverOffset) => {
                 const item = document.createElement('li');
                 item.textContent = msg;
@@ -89,12 +93,6 @@
                 window.scrollTo(0, document.body.scrollHeight);
                 socket.auth.serverOffset = serverOffset;
             });
-
-            function upload(files) {
-                socket.emit('upload', files[0], (status) => {
-                    console.log(status);
-                });
-            }
         </script>
     </body>
 </html>
