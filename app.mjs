@@ -2,42 +2,43 @@ import express from 'express';
 import { Server } from 'socket.io';
 import 'dotenv/config';
 import { createServer } from 'node:http';
-import { writeFile } from 'fs';
 import router from './routes/index.mjs';
+import db from './db.mjs';
 
 const app = express();
 const PORT = process.env.PORT;
 const server = createServer(app);
-const io = new Server(server, {
-    connectionStateRecovery: {},
-    // maxHttpBufferSize: 1e8,
-});
+const io = new Server(server);
 
 app.use(router);
 
-io.on('connection', (socket) => {
-    console.log('User has been connected!');
-    io.emit('chat message', 'User has been connected')
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
+io.on('connection', async (socket) => {
+    socket.on('chat message', async (msg) => {
+        let result;
+        try {
+            result = await db.query(
+                'INSERT INTO messages (content) VALUES ($1) RETURNING *',
+                [msg]
+            );
+        } catch (e) {
+            return console.log(e);
+        }
+        io.emit('chat message', msg, result.lastId);
     });
-    socket.on('disconnect', () => {
-        console.log('User has been disconnected!');
-        io.emit('chat message', 'User has been disconnected')
-    });
+    if (!socket.recovered) {
+        try {
+            const res = await db.query(
+                'SELECT id, content FROM messages WHERE id > $1',
+                [0]
+            );
+            for (let row of res.rows) {
+                socket.emit('chat message', row.content, row.id);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
 });
-
-// io.on('connection', (socket) => {
-//     socket.on('upload', (file, callback) => {
-//         console.log(file); // <Buffer 25 50 44 ...>
-
-//         // save the content to the disk, for example
-//         writeFile('/tmp/upload', file, (err) => {
-//             callback({ message: err ? 'failure' : 'success' });
-//             console.log
-//         });
-//     });
-// });
 
 server.listen(PORT, () => {
     console.log(`Server was started on port: ${PORT}`);
