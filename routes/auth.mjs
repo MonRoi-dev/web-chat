@@ -6,7 +6,11 @@ import userController from '../controllers/user.mjs';
 const router = Router();
 
 router.get('/login', authController.getLog);
-router.post('/login', userController.login);
+router.post('/login', [
+    check('email', 'Invalid email').isEmail().notEmpty(),
+    check('password', 'Password is empty').isLength({min: 4, max: 24}).notEmpty()
+],
+userController.login);
 router.get('/registration', authController.getReg);
 router.post('/registration',[
     check('username', 'Username is empty').notEmpty(),

@@ -54,7 +54,14 @@ class UserController {
 
     async login(req, res) {
         try {
-            const { email, usernmae, password } = req.body;
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                console.log(errors);
+                return res
+                    .status(400)
+                    .json({ message: `${errors.errors[0].msg}` });
+            }
+            const { email, password } = req.body;
             const user = await db.query(
                 'SELECT * FROM users WHERE email = $1',
                 [email]
