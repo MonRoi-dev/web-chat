@@ -1,0 +1,57 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io({
+    auth: {
+      serverOffset: 0
+    }
+  });
+
+  let messages = document.getElementById('messages');
+  let form = document.getElementById('form');
+  let input = document.getElementById('input');
+  let activity = document.getElementById('activity')
+  const cookies = document.cookie;
+
+const cookiesArray = cookies.split(';');
+let jwtCookie;
+for (let cookie of cookiesArray) {
+    if (cookie.trim().startsWith('jwt=')) {
+        jwtCookie = cookie.trim().substring("jwt=".length, cookie.length);
+        break;
+    }
+}
+
+const decodedToken = JSON.parse(atob(jwtCookie.split('.')[1]));
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (input.value) {
+      socket.emit('chat message', input.value, decodedToken.id);
+      input.value = '';
+    }
+  });
+
+ input.addEventListener('keydown', () => {
+    socket.emit('activity', decodedToken.username)
+  })
+
+  socket.on('chat message', function(msg) {
+    activity.textContent = ''
+    var item = document.createElement('li');
+    item.textContent = msg;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+    {{!-- socket.auth.serverOffset = serverOffset; --}}
+  });
+
+ let activityTimer
+ socket.on('activity', (name) => {
+  activity.textContent = `${name} is typing...`
+
+      clearTimeout(activityTimer);
+    activityTimer = setTimeout(() => {
+        activity.textContent = '';
+    }, 1500);
+ })
+
+</script>

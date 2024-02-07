@@ -1,0 +1,36 @@
+<div class='container'>
+    <div class='row' style='margin-top: 50px'>
+        <h2 class='input-field offset-s5 col s6'>Register</h2>
+        <form action='/auth/registration' method='POST'>
+
+            <div class='name input-field offset-s3 col s6'>
+                <input value='' id='first_name2' name='username' type='text' class='validate' />
+                <label class='active' for='first_name2'>First Name</label>
+            </div>
+
+            <div class='input-field offset-s3 col s6'>
+                <input
+                    id='email_inline'
+                    name="email" 
+                    type='email'
+                    class='validate'
+                />
+                <label class='active' for='email'>Email</label>
+            </div>
+            <div class='row'>
+                <div class='input-field offset-s3 col s6'>
+                    <input id='password' name = 'password' type='password' class='validate' />
+                    <label class='active' for='password'>Password</label>
+                </div>
+            </div>
+
+            <button
+                class='btn waves-effect waves-light offset-s3'
+                type='submit'
+                name='action'
+                style='display: block; margin: 0 auto'
+            >Register
+            </button>
+        </form>
+    </div>
+</div>
